@@ -55,7 +55,7 @@ vec4 trippy_circle(vec2 pos){
     
     float dist = distance(pos, vec2(0.5,0.5));
 
-    float angle = atan(pos.y - 0.5, pos.x - 0.5);
+    float angle = abs(atan(pos.y - 0.5, pos.x - 0.5));
 
     angle = pow(angle, 3.0);
     
