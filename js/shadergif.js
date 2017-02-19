@@ -94,14 +94,13 @@ function init_ctx(ctx){
     var tot = 200;
     for(var i = tot; i >= 0; i--){
         var z = 4.0 * i/tot - 2.0;
-        console.log(z);
 
-        vertices.push(-1,1,z);
-        vertices.push(-1,-1,z)
-        vertices.push(1,1,z)
-        vertices.push(-1,-1,z)
-        vertices.push(1,1,z)
-        vertices.push(1,-1,z)
+        vertices.push(-1,1,z,
+                       -1,-1,z,
+                       1,1,z,
+                       -1,-1,z,
+                       1,1,z,
+                       1,-1,z)
     }
 
     tris_len = vertices.length;
