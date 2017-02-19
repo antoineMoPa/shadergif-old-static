@@ -14,33 +14,54 @@
       <br>
       <col-md-6>
         <h3>Fragment Shader</h3>
-        <textarea name='fragment'>
+     <textarea name='fragment'>
 // Fragment shader
 precision highp float;
 
-varying vec2 UV;
-varying vec3 v_position;
+varying vec3 pos;
 uniform float time;
 uniform float ratio;
 uniform vec2 mouse;
 
+#define PI 3.14159265359
+#define PI2 6.28318530718
+
+float object(vec3 pos){
+	
+    float func = 0.1 *
+        sin(
+            50.0 *
+            sqrt(
+                pow(pos.x, 2.0) + pow(pos.z, 2.0)
+                ) - time * PI2) - 2.0;
+    
+    if(pos.y < func){
+    	return 1.0;
+    }
+    
+    return 0.0;
+}
+
+float scene(vec3 pos){
+	
+    pos.y *= 4.0;
+
+    pos.xy *= 1.0 + 0.9 * pos.z;
+   	
+    return object(pos);
+}
+
 void main(void){
-    float x = UV.x * ratio;
-    float y = UV.y;
-    
     vec4 col = vec4(0.0);
+	
+    col += scene(pos);
     
-    x *= distance(mouse, vec2(x, y - 1.0));
-    y *= distance(mouse, vec2(x, y));
-    
-    col.r = abs(sin(30.0 * y + 3.1416 * time + 0.3));
-    col.b = abs(sin(30.0 * y + 3.1416 * time + 0.5));
-    col.b = abs(sin(30.0 * y + 3.1416 * time + 1.0));
-    col *= cos(30.0 * x);
     col.a = 1.0;
     
-    gl_FragColor = col;
-}</textarea>
+    gl_FragColor = 0.01 * col;
+}
+     
+     </textarea>
 
         <pre class="fragment-error-pre error-pre">
         </pre>
@@ -81,14 +102,13 @@ void main(void){
       <script name="vertex-shader" type="text/plain">
 // Vertex Shader
 attribute vec3 position;
-varying vec2 UV;
-varying vec3 v_position;
+varying vec3 pos;
 uniform float time;
 
 void main(){
-    v_position = position;
-    UV = vec2((position.x+1.0) / 2.0, (position.y + 1.0)/2.0);
-    gl_Position = vec4(v_position.x,v_position.y, 0.0, 1.0);
+    pos = position;
+    
+    gl_Position = vec4(pos.x, pos.y, pos.z, 1.0);
 }
       </script>
       

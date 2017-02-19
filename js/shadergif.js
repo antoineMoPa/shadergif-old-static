@@ -15,11 +15,6 @@ var frame = 0;
 var mouse = [0.0, 0.0];
 var smooth_mouse = [0.0, 0.0];
 
-// The main canvas
-var canvas = qsa(".result-canvas")[0];
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
 var matches =
     window.location.href.match(
             /\?file\=([a-zA-Z0-9\/]+\.glsl)/
@@ -31,20 +26,16 @@ if(matches != null){
     filename = matches[1] || "";
 }
 
-var ratio = canvas.width / window.height;
-
 // Canvas for making gifs
 var gif_canvas = qsa(".gif-canvas")[0];
 gif_canvas.width = 500;
 gif_canvas.height = 500;
 
-var res_ctx = canvas.getContext("webgl");
 var gif_ctx = gif_canvas.getContext("webgl");
 
 var fragment_error_pre = qsa(".fragment-error-pre")[0];
 var vertex_error_pre = qsa(".vertex-error-pre")[0];
 
-enable_mouse(canvas);
 enable_mouse(gif_canvas);
 
 function enable_mouse(can){
@@ -81,26 +72,42 @@ function enable_mouse(can){
     });
 }
 
-init_ctx(res_ctx);
 init_ctx(gif_ctx);
+
+var tris;
+var tris_len;
 
 function init_ctx(ctx){
     ctx.clearColor(0.0, 0.0, 0.0, 1.0);
-    ctx.enable(ctx.DEPTH_TEST);
-    ctx.depthFunc(ctx.LEQUAL);
+    ctx.disable(ctx.DEPTH_TEST);
+    //ctx.depthFunc(ctx.LEQUAL);
+    ctx.enable(ctx.BLEND);
+    ctx.blendFunc(ctx.ONE, ctx.ONE);
     ctx.clear(ctx.COLOR_BUFFER_BIT | ctx.DEPTH_BUFFER_BIT);
 
-    // Triangle strip for whole screen square
-    var vertices = [
-            -1,-1,0,
-            -1,1,0,
-        1,-1,0,
-        1,1,0,
-    ];
+    tris = ctx.createBuffer();
     
-    var tri = ctx.createBuffer();
-    ctx.bindBuffer(ctx.ARRAY_BUFFER,tri);
+    ctx.bindBuffer(ctx.ARRAY_BUFFER,tris);
+
+    var vertices = [];
+
+    var tot = 200;
+    for(var i = tot; i >= 0; i--){
+        var z = 4.0 * i/tot - 2.0;
+        console.log(z);
+
+        vertices.push(-1,1,z);
+        vertices.push(-1,-1,z)
+        vertices.push(1,1,z)
+        vertices.push(-1,-1,z)
+        vertices.push(1,1,z)
+        vertices.push(1,-1,z)
+    }
+
+    tris_len = vertices.length;
+    
     ctx.bufferData(ctx.ARRAY_BUFFER, new Float32Array(vertices), ctx.STATIC_DRAW);
+    
 }
 
 var vertex_code = load_script("vertex-shader");
@@ -134,7 +141,6 @@ f_editor.on("change", update_shader);
 update_shader();
 
 function update_shader(){
-    init_program(res_ctx);
     init_program(gif_ctx);
 }
 
@@ -151,7 +157,7 @@ function init_program(ctx){
         var shader = ctx.createShader(type);
         ctx.shaderSource(shader,content);
         ctx.compileShader(shader);
-
+        
         // Find out right error pre
         var type_pre = type == ctx.VERTEX_SHADER ?
             vertex_error_pre:
@@ -192,6 +198,9 @@ function init_program(ctx){
 }
 
 function draw_ctx(can, ctx, time){
+    
+    ctx.clear(ctx.COLOR_BUFFER_BIT | ctx.DEPTH_BUFFER_BIT);
+    
     // Set time attribute
     var tot_time = anim_len * anim_delay;
 
@@ -210,7 +219,7 @@ function draw_ctx(can, ctx, time){
 
     var ratioAttribute = ctx.getUniformLocation(ctx.program, "ratio");
     ctx.uniform1f(ratioAttribute, ratio);
-
+    
     // Mouse
     var x = mouse[0] / can.width * ratio;
     var y = - mouse[1] / can.height;
@@ -228,22 +237,16 @@ function draw_ctx(can, ctx, time){
     );
     
     ctx.uniform2fv(smAttribute, smooth_mouse);
-    
-    ctx.drawArrays(ctx.TRIANGLE_STRIP, 0, 4);
 
+
+    ctx.bindBuffer(ctx.ARRAY_BUFFER, tris);
+    ctx.drawArrays(ctx.TRIANGLES, 0, tris_len/3);
+    
     ctx.viewport(0, 0, can.width, can.height);
 
 }
 
 var rendering_gif = false;
-
-function draw(){
-    draw_ctx(canvas, res_ctx);
-
-    window.requestAnimationFrame(draw);
-}
-
-window.requestAnimationFrame(draw);
 
 setInterval(
     function(){
