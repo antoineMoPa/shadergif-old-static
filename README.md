@@ -4,6 +4,20 @@ A tool to play with fragment shaders to create nice 2D images. (Because fragment
 
 Features gif export. (To export a 10 frame gif).
 
+# Branches
+
+## Master
+
+The original 2D shadergif.
+
+http://a-mo-pa.com/stuff/shadergif/
+
+## Volumegif
+
+Switch to this branch for volumetric fun.
+
+http://a-mo-pa.com/stuff/shadervolume/
+
 # Uniforms
 
 time - goes from 0.0 to 1.0 and repeats
