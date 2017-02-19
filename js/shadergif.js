@@ -80,7 +80,7 @@ var tris_len;
 function init_ctx(ctx){
     ctx.clearColor(0.0, 0.0, 0.0, 1.0);
     ctx.disable(ctx.DEPTH_TEST);
-    //ctx.depthFunc(ctx.LEQUAL);
+
     ctx.enable(ctx.BLEND);
     ctx.blendFunc(ctx.ONE, ctx.ONE);
     ctx.clear(ctx.COLOR_BUFFER_BIT | ctx.DEPTH_BUFFER_BIT);
