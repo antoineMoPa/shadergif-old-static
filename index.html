@@ -78,6 +78,12 @@ gl_FragColor = col;
             (be patient and open console to see messages)<br>
             Due to compression by gif.js, result may appear weird to you (or fancier?).
           </p>
+          <p>
+              For pngs, on Linux, you can split the result like this:
+              <pre>convert image.png -crop 500x500 +repage image-%04d.png</pre>
+              And then make gifs:
+              <pre>convert image-*.png anim.gif</pre>
+          </p>
         </div>
         
         <div class="result-images">
