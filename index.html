@@ -28,8 +28,10 @@ uniform float ratio;
 uniform vec2 mouse;
 
 void main(void){
-    float x = UV.x * ratio;
-    float y = UV.y;
+    float x = UV.x * ratio - 0.5;
+    float y = UV.y - 0.5;
+    vec2 pos = vec2(x, y); 
+    
     
     vec4 col = vec4(0.0);
     
