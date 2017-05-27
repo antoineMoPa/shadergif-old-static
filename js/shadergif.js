@@ -284,22 +284,39 @@ function make_png(){
     canvas.height = gif_canvas.height * anim_len;
     var ctx = canvas.getContext("2d");
 
-    for(var i = 0; i < anim_len; i++){
-        draw_ctx(gif_canvas, gif_ctx, (i + 1)/anim_len);
-        var image_data = gif_canvas.toDataURL();
-        var temp_img = document.createElement("img");
-        temp_img.src = image_data;
-        ctx.drawImage(temp_img, 0, i * gif_canvas.height);
+    var i = 0;
+
+    /*
+      "Unrolled" async loop:
+      for every image:
+      render & load image
+      onload: add to canvas
+      when all are loaded: create image from canvas
+     */
+    function next(){
+        if(i < anim_len){
+            var curr = i;
+            draw_ctx(gif_canvas, gif_ctx, (curr + 1)/anim_len);
+            var image_data = gif_canvas.toDataURL();
+            var temp_img = document.createElement("img");
+            temp_img.src = image_data;
+            temp_img.onload = function(){
+                ctx.drawImage(temp_img, 0, curr * gif_canvas.height);
+                next();
+            }
+        } else {
+            // Final step
+            var image_data = canvas.toDataURL();
+            var image = document.createElement("img");
+            image.src = image_data;
+            rendering_gif = false;
+            var images_div = qsa(".result-images")[0];
+            images_div.insertBefore(image, images_div.firstChild);
+        }
+        i++;
     }
-
-    var image_data = canvas.toDataURL();
-    var image = document.createElement("img");
-    image.src = image_data;
-
-    var images_div = qsa(".result-images")[0];
-    images_div.insertBefore(image, images_div.firstChild);
     
-    rendering_gif = false;
+    next();
 }
 
 // Make the gif from the frames
