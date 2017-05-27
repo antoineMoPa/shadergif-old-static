@@ -15,11 +15,6 @@ var frame = 0;
 var mouse = [0.0, 0.0];
 var smooth_mouse = [0.0, 0.0];
 
-// The main canvas
-var canvas = qsa(".result-canvas")[0];
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
 var matches =
     window.location.href.match(
             /\?file\=([a-zA-Z0-9\/]+\.glsl)/
@@ -31,20 +26,16 @@ if(matches != null){
     filename = matches[1] || "";
 }
 
-var ratio = canvas.width / window.height;
-
 // Canvas for making gifs
 var gif_canvas = qsa(".gif-canvas")[0];
 gif_canvas.width = 500;
 gif_canvas.height = 500;
 
-var res_ctx = canvas.getContext("webgl");
 var gif_ctx = gif_canvas.getContext("webgl");
 
 var fragment_error_pre = qsa(".fragment-error-pre")[0];
 var vertex_error_pre = qsa(".vertex-error-pre")[0];
 
-enable_mouse(canvas);
 enable_mouse(gif_canvas);
 
 function enable_mouse(can){
@@ -81,7 +72,6 @@ function enable_mouse(can){
     });
 }
 
-init_ctx(res_ctx);
 init_ctx(gif_ctx);
 
 function init_ctx(ctx){
@@ -134,7 +124,6 @@ f_editor.on("change", update_shader);
 update_shader();
 
 function update_shader(){
-    init_program(res_ctx);
     init_program(gif_ctx);
 }
 
@@ -238,8 +227,6 @@ function draw_ctx(can, ctx, time){
 var rendering_gif = false;
 
 function draw(){
-    draw_ctx(canvas, res_ctx);
-
     window.requestAnimationFrame(draw);
 }
 
@@ -261,10 +248,12 @@ setInterval(
 );
 
 var gif_button = qsa("button[name='make-gif']")[0];
+var png_button = qsa("button[name='make-png']")[0];
 
 gif_button.addEventListener("click", make_gif);
+png_button.addEventListener("click", make_png);
 
-// Render all the frames
+// Render all the frames to a gif
 function make_gif(){
     var to_export = {};
     
@@ -282,6 +271,35 @@ function make_gif(){
     rendering_gif = false;
     
     export_gif(to_export);
+}
+
+// Render all the frames to a png
+function make_png(){
+    rendering_gif = true;
+    
+    var tempCanvas = document.createElement("canvas");
+    var canvas = tempCanvas;
+    
+    canvas.width = gif_canvas.width;
+    canvas.height = gif_canvas.height * anim_len;
+    var ctx = canvas.getContext("2d");
+
+    for(var i = 0; i < anim_len; i++){
+        draw_ctx(gif_canvas, gif_ctx, (i + 1)/anim_len);
+        var image_data = gif_canvas.toDataURL();
+        var temp_img = document.createElement("img");
+        temp_img.src = image_data;
+        ctx.drawImage(temp_img, 0, i * gif_canvas.height);
+    }
+
+    var image_data = canvas.toDataURL();
+    var image = document.createElement("img");
+    image.src = image_data;
+
+    var images_div = qsa(".result-images")[0];
+    images_div.insertBefore(image, images_div.firstChild);
+    
+    rendering_gif = false;
 }
 
 // Make the gif from the frames
@@ -317,7 +335,7 @@ function export_gif(to_export){
         }
         
         gif.render();
-
+        
         var images_div = qsa(".result-images")[0];
         
         gif.on('finished',function(blob){
@@ -326,7 +344,7 @@ function export_gif(to_export){
             img.src = URL.createObjectURL(blob);
 
             // Add it to the body
-            images_div.insertBefore(img, images_div.firstChild)
+            images_div.insertBefore(img, images_div.firstChild);
         })
     }
 }

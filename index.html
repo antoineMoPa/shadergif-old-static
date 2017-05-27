@@ -9,9 +9,6 @@
   </head>
   <body>
     <div class="page-content">
-      <canvas class="result-canvas"></canvas>
-
-      <br>
       <col-md-6>
         <h3>Fragment Shader</h3>
         <textarea name='fragment'>
@@ -44,7 +41,7 @@ void main(void){
     col *= cos(30.0 * x);
     col.a = 1.0;
     
-    gl_FragColor = col;
+gl_FragColor = col;
 }</textarea>
 
         <pre class="fragment-error-pre error-pre">
@@ -63,9 +60,13 @@ void main(void){
         <canvas class="gif-canvas"></canvas>
 
         <button name="make-gif">
-          Make a gif from this
+            Create gif
         </button>
-                
+        
+        <button name="make-png">
+            Create stacked png
+        </button>
+        
       </col-md-6>
       
       <clearfix></clearfix>
