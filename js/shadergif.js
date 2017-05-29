@@ -13,8 +13,11 @@
 
 function resize(){
     var parent = qsa(".vertical-scroll-parent")[0];
-    console.log(parent.style.height);
-    parent.style.height = window.innerHeight + "px";
+    if(window.innerWidth > 768){
+        parent.style.height = window.innerHeight + "px";
+    } else {
+        parent.style.height = "auto";
+    }
 }
 resize();
 window.addEventListener("resize",resize);

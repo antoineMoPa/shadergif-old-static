@@ -116,3 +116,18 @@ hr{
     overflow-y:hidden;
 }
 
+@media all and (max-width:768px){
+    body{
+        overflow-y:scroll;
+    }
+    canvas,img{
+        max-width:100%;
+    }
+    .vertical-clip,.vertical-scroll{
+        max-height:none;
+        overflow-y:scroll;
+    }
+    .vertical-scroll-parent{
+        max-height:none;
+    }
+}
