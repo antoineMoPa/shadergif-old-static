@@ -9,6 +9,16 @@
 
   */
 
+
+
+function resize(){
+    var parent = qsa(".vertical-scroll-parent")[0];
+    console.log(parent.style.height);
+    parent.style.height = window.innerHeight + "px";
+}
+resize();
+window.addEventListener("resize",resize);
+
 var anim_len = 10;
 var anim_delay = 100;
 var frame = 0;
