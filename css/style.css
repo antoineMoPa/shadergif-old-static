@@ -131,3 +131,15 @@ hr{
         max-height:none;
     }
 }
+
+.settings{
+    margin-left:10px;
+    font-size:12px;
+    line-height:44px;
+}
+
+.settings input{
+    width:50px;
+    font-size:12px;
+    margin-left:3px;
+}

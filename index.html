@@ -11,7 +11,7 @@
         <header>
             <h1>ShaderGif</h1>
         </header>
-        <div class="page-content vertical-scroll-parent">
+        <div id="shadergif-app" class="page-content vertical-scroll-parent">
             <col-md-6 class="vertical-clip">
                 <div class="vertical-scroll-spacer"></div>
                 <textarea name='fragment'>
@@ -25,18 +25,13 @@ varying vec2 UV;
 varying vec3 v_position;
 uniform float time;
 uniform float ratio;
-uniform vec2 mouse;
 
 void main(void){
 	float x = UV.x * ratio - 0.5;
 	float y = UV.y - 0.5;
 	vec2 pos = vec2(x, y); 
 	
-	
 	vec4 col = vec4(0.0);
-	
-	x *= distance(mouse, vec2(x, y - 1.0));
-	y *= distance(mouse, vec2(x, y));
 	
 	col.r = abs(sin(30.0 * y + 3.1416 * time + 0.3));
 	col.b = abs(sin(30.0 * y + 3.1416 * time + 0.5));
@@ -47,7 +42,7 @@ void main(void){
 	gl_FragColor = col;
 }
 </textarea>
-
+                
                 <pre class="fragment-error-pre error-pre">
                 </pre>
                 
@@ -60,7 +55,6 @@ void main(void){
                 <div class="text-center">
                     <h3>Gif preview</h3>
                 </div>
-                
                 <canvas class="gif-canvas"></canvas>
 
                 <div class="text-center">
@@ -71,6 +65,12 @@ void main(void){
                     <button name="make-png" class="inline-block">
                         Create stacked png
                     </button>
+                    
+                    <div class="settings inline-block">
+                        w:<input type="number" v-model.lazy="width">
+                        h:<input type="number" v-model.lazy="height">
+                    </div>
+
                 </div>
                 
                 <hr>
@@ -87,7 +87,7 @@ void main(void){
                 <div class="text-left">
                     <p>
                         For pngs, on Linux, you can split the result like this:
-                        <pre>convert image.png -crop 500x500 +repage image-%04d.png</pre>
+                        <pre>convert image.png -crop {{width}}x{{height}} +repage image-%04d.png</pre>
                     </p>
                     <p>
                         And then make gifs:
@@ -113,6 +113,7 @@ void main(void){
             </script>
             
             <script src="js/lib/codemirror/codemirror.js"></script>
+            <script src="js/lib/vue.min.js"></script>
             <script src="js/lib/base.js"></script>
             <script src="gif-export/lib/gifjs/gif.js"></script>
             <script src="js/shadergif.js"></script>

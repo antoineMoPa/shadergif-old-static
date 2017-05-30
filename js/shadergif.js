@@ -9,7 +9,22 @@
 
   */
 
-
+var app = new Vue({
+    el: "#shadergif-app",
+    data: {
+        canvas: null,
+        width: 550,
+        height: 550,
+    },
+    watch: {
+        width: function(w){
+            this.canvas.width = w;
+        },
+        height: function(h){
+            this.canvas.height = h;
+        }
+    }
+})
 
 function resize(){
     var parent = qsa(".vertical-scroll-parent")[0];
@@ -25,8 +40,6 @@ window.addEventListener("resize",resize);
 var anim_len = 10;
 var anim_delay = 100;
 var frame = 0;
-var mouse = [0.0, 0.0];
-var smooth_mouse = [0.0, 0.0];
 
 var matches =
     window.location.href.match(
@@ -41,49 +54,15 @@ if(matches != null){
 
 // Canvas for making gifs
 var gif_canvas = qsa(".gif-canvas")[0];
-gif_canvas.width = 500;
-gif_canvas.height = 500;
+gif_canvas.width = 550;
+gif_canvas.height = 550;
+
+app.canvas = gif_canvas;
 
 var gif_ctx = gif_canvas.getContext("webgl");
 
 var fragment_error_pre = qsa(".fragment-error-pre")[0];
 var vertex_error_pre = qsa(".vertex-error-pre")[0];
-
-enable_mouse(gif_canvas);
-
-function enable_mouse(can){
-    can.hover = false;
-    
-    mouse = [can.width / 2.0, can.height / 2.0];
-    smooth_mouse = [0.5, 0.5];
-
-    can.addEventListener("mouseenter", function(e){
-        can.hover = true;
-        mouse = [can.width / 2.0, can.height / 2.0];
-    });
-    
-    can.addEventListener("mousemove", setMouse);
-    
-    function setMouse(e){
-        var x, y;
-        
-        x = e.clientX
-            - can.offsetLeft
-            - can.offsetParent.offsetLeft
-            + window.scrollX;
-        y = e.clientY
-            - can.offsetTop
-            - can.offsetParent.offsetTop
-            + window.scrollY;
-        
-        mouse = [x, y];
-    }
-    
-    can.addEventListener("mouseleave", function(){
-        can.hover = false;
-        mouse = [can.width / 2.0, can.height / 2.0];
-    });
-}
 
 init_ctx(gif_ctx);
 
@@ -213,24 +192,6 @@ function draw_ctx(can, ctx, time){
     var ratioAttribute = ctx.getUniformLocation(ctx.program, "ratio");
     ctx.uniform1f(ratioAttribute, ratio);
 
-    // Mouse
-    var x = mouse[0] / can.width * ratio;
-    var y = - mouse[1] / can.height;
-    var mouseAttribute = ctx.getUniformLocation(ctx.program, "mouse");
-    ctx.uniform2fv(mouseAttribute, [x, y]);
-
-    // Smooth mouse
-    if(can.hover == true){
-        smooth_mouse[0] = 0.9 * smooth_mouse[0] + 0.1 * x;
-        smooth_mouse[1] = 0.9 * smooth_mouse[1] + 0.1 * y;
-    }
-
-    var smAttribute = ctx.getUniformLocation(
-        ctx.program, "smooth_mouse"
-    );
-    
-    ctx.uniform2fv(smAttribute, smooth_mouse);
-    
     ctx.drawArrays(ctx.TRIANGLE_STRIP, 0, 4);
 
     ctx.viewport(0, 0, can.width, can.height);
