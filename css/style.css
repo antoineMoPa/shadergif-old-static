@@ -55,10 +55,17 @@ textarea{
     font-size:15px;
 }
 
-.error-pre{
-    padding:10px;
+.fragment-error-pre{
+    margin:0;
+    padding:0px;
     font-size:15px;
     color:red;
+    position:absolute;
+    bottom:0;
+    left:0;
+    z-index:2000;
+    background:#eee;
+    width:100%;
 }
 
 .gif-canvas{
