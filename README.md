@@ -24,8 +24,6 @@ time - goes from 0.0 to 1.0 and repeats
 
 ratio - The screen ratio (Can be used to adapt the code for the big & small canvases)
 
-mouse - the mouse position
-
 # Examples
 
 Jellyfish: http://a-mo-pa.com/stuff/shadergif/?file=examples/jellyfish.glsl
