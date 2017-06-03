@@ -9,10 +9,25 @@
 
   */
 
+var is_example = window.location.href.match(/\?file\=([a-zA-Z0-9\/]+\.glsl)/);
+
+function default_fragment_policy(){
+    var code = "";
+    
+    if(window.localStorage.code != undefined && window.localStorage.code != ""){
+        code = window.localStorage.code;
+    } else {
+        code = load_script("default-fragment-shader");
+    }
+
+    return code;
+}
+
 var app = new Vue({
     el: "#shadergif-app",
     data: {
         canvas: null,
+        code: default_fragment_policy(),
         width: 550,
         height: 550,
     },
@@ -23,8 +38,14 @@ var app = new Vue({
         height: function(h){
             this.canvas.height = h;
         }
+    },
+    methods: {
+        code_change: function(){
+            window.localStorage.code = this.code;
+            update_shader();
+        }
     }
-})
+});
 
 function resize(){
     var parent = qsa(".vertical-scroll-parent")[0];
@@ -41,15 +62,10 @@ var anim_len = 10;
 var anim_delay = 100;
 var frame = 0;
 
-var matches =
-    window.location.href.match(
-            /\?file\=([a-zA-Z0-9\/]+\.glsl)/
-    );
-
 var filename = "";
 
-if(matches != null){
-    filename = matches[1] || "";
+if(is_example != null){
+    filename = is_example[1] || "";
 }
 
 // Canvas for making gifs
@@ -111,7 +127,10 @@ if(filename != ""){
     }
 }
 
-f_editor.on("change", update_shader);
+f_editor.on("change", function(){
+    app.code = f_editor.getValue();
+    app.code_change();
+});
 
 update_shader();
 

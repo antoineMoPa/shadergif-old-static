@@ -6,8 +6,6 @@ precision highp float;
 
 varying vec2 UV;
 varying vec3 v_position;
-uniform vec2 mouse;
-uniform vec2 smooth_mouse;
 uniform float time;
 uniform float ratio;
 
@@ -145,7 +143,7 @@ void main(void){
 
     col += 0.1 * background(pos);
 
-    vec4 jfish = jellyfish(pos - smooth_mouse);
+    vec4 jfish = jellyfish(pos + vec2(-0.5, 0.5));
 
     col += jfish;
     
