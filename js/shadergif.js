@@ -11,6 +11,8 @@
 
 var is_example = window.location.href.match(/\?file\=([a-zA-Z0-9\/]+\.glsl)/);
 
+var cm_errorLines = [];
+
 function default_fragment_policy(){
     var code = "";
     
@@ -27,6 +29,7 @@ var app = new Vue({
     el: "#shadergif-app",
     data: {
         canvas: null,
+        error: "",
         code: default_fragment_policy(),
         width: 550,
         height: 550,
@@ -110,6 +113,10 @@ var f_editor = CodeMirror.fromTextArea(fragment_code, {
     lineNumbers: true,
 });
 
+
+//f_editor.setCursor({line: 10, ch: 0});
+f_editor.addOverlay("dfdasfdd");
+
 // Fetch file and put it in textarea
 if(filename != ""){
     try{
@@ -138,9 +145,25 @@ function update_shader(){
     init_program(gif_ctx);
 }
 
+function add_error(err, type_str, type_pre){
+    var line = err.match(/^ERROR: [0-9]*:([0-9]*)/)[1];
+    line = parseInt(line) - 1;
+    var errline = f_editor.addLineClass(line, "background", "errorline");
+    cm_errorLines.push(errline);
+    type_pre.textContent =
+        "Error in " + type_str + " shader.\n" +
+        err;
+    
+}
+
 function init_program(ctx){
     ctx.program = ctx.createProgram();
-        
+
+    // Remove previous errors
+    for(var err in cm_errorLines){
+        f_editor.removeLineClass(cm_errorLines[err],"background");
+    }
+    
     var vertex_shader =
         add_shader(ctx.VERTEX_SHADER, vertex_code);
     
@@ -159,21 +182,26 @@ function init_program(ctx){
         
         if(!ctx.getShaderParameter(shader, ctx.COMPILE_STATUS)){
             var err = ctx.getShaderInfoLog(shader);
-
+            
             // Find shader type
             var type_str = type == ctx.VERTEX_SHADER ?
                 "vertex":
                 "fragment";
             
-            type_pre.textContent =
-                "Error in " + type_str + " shader.\n" +
-                err;
+            add_error(err, type_str, type_pre);
+
+            return -1;
         } else {
             type_pre.textContent = "";
         }
-        
+
         ctx.attachShader(ctx.program, shader);
+        
         return shader;
+    }
+
+    if(vertex_shader == -1 || fragment_shader == -1){
+        return;
     }
     
     ctx.linkProgram(ctx.program);
