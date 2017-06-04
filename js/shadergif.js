@@ -31,8 +31,8 @@ var app = new Vue({
         canvas: null,
         error: "",
         code: default_fragment_policy(),
-        width: 550,
-        height: 550,
+        width: 540,
+        height: 540,
     },
     watch: {
         width: function(w){
