@@ -17,6 +17,8 @@ void main(void){
     if(distance_from_center < 0.3){
         col.rgba = vec4(0.4, 0.5, 0.6, 1.0);
     }
+
+    col.a = 1.0;
     
     gl_FragColor = col;
 }
