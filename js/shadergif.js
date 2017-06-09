@@ -148,14 +148,16 @@ function update_shader(){
 }
 
 function add_error(err, type_str, type_pre){
-    var line = err.match(/^ERROR: [0-9]*:([0-9]*)/)[1];
-    line = parseInt(line) - 1;
-    var errline = f_editor.addLineClass(line, "background", "errorline");
-    cm_errorLines.push(errline);
-    type_pre.textContent =
-        "Error in " + type_str + " shader.\n" +
-        err;
-    
+    try{
+	var line = err.match(/^ERROR: [0-9]*:([0-9]*)/)[1];
+	line = parseInt(line) - 1;
+	var errline = f_editor.addLineClass(line, "background", "errorline");
+	cm_errorLines.push(errline);
+    } finally {
+	type_pre.textContent =
+            "Error in " + type_str + " shader.\n" +
+            err;
+    }
 }
 
 function init_program(ctx){
@@ -234,6 +236,21 @@ function draw_ctx(can, ctx, time){
     
     var timeAttribute = ctx.getUniformLocation(ctx.program, "time");
     ctx.uniform1f(timeAttribute, time);
+
+    var iGlobalTimeAttribute = ctx.getUniformLocation(ctx.program, "iGlobalTime");
+    var date = new Date();
+    var time = (date.getTime() % (3600 * 24)) / 1000.0;
+    ctx.uniform1f(iGlobalTimeAttribute, time);
+    var iResolutionAttribute = ctx.getUniformLocation(ctx.program, "iResolution");
+    
+    ctx.uniform3fv(iResolutionAttribute,
+		   new Float32Array(
+		       [
+			   can.width,
+			   can.height,
+			   1.0
+		       ])
+		  );
     
     // Screen ratio
     var ratio = can.width / can.height;
