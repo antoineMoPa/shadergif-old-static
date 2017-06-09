@@ -15,7 +15,7 @@ void main(void){
     vec4 col = vec4(0.0);
 
     // Create an angle from time
-    // Multipliying by PI * 2.0 will make
+    // Multiplying by PI * 2.0 will make
     // the animation seamless. AKA perfect loop.
     float angle = time * PI * 1.0;
 
