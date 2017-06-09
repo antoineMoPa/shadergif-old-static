@@ -73,8 +73,8 @@ if(is_example != null){
 
 // Canvas for making gifs
 var gif_canvas = qsa(".gif-canvas")[0];
-gif_canvas.width = 550;
-gif_canvas.height = 550;
+gif_canvas.width = 540;
+gif_canvas.height = 540;
 
 app.canvas = gif_canvas;
 
