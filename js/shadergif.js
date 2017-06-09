@@ -9,7 +9,7 @@
 
   */
 
-var is_example = window.location.href.match(/\?file\=([a-zA-Z0-9\/]+\.glsl)/);
+var is_example = window.location.href.match(/\?file\=([_a-zA-Z0-9\/]+\.glsl)/);
 
 var cm_errorLines = [];
 
@@ -58,6 +58,7 @@ function resize(){
         parent.style.height = "auto";
     }
 }
+
 resize();
 window.addEventListener("resize",resize);
 

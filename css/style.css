@@ -19,6 +19,15 @@ header{
     z-index:2000;
 }
 
+.examples-page header{
+    position:static;
+}
+
+.examples-page p,
+.examples-page h2{
+    margin-left:20px;
+}
+
 h1,h2,h3{
     margin-top:20px;
     margin-bottom:20px;
@@ -28,11 +37,22 @@ h1,h2,h3{
 h1{
     font-size:20px;
     font-weight:300;
+    display:inline-block;
     padding:0;
     margin:0;
     margin-left:10px;
+    margin-right:20px;
     color:#fff;
     line-height:40px;
+}
+
+header a{
+    color:#fff;
+    text-decoration:none;
+}
+
+.examples-list{
+    margin-top:40px;
 }
 
 p,pre,ul{
