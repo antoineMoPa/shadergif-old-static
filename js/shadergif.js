@@ -31,6 +31,7 @@ var app = new Vue({
         canvas: null,
         error: "",
         code: default_fragment_policy(),
+	frames: 10,
         width: 540,
         height: 540,
     },
@@ -62,7 +63,6 @@ function resize(){
 resize();
 window.addEventListener("resize",resize);
 
-var anim_len = 10;
 var anim_delay = 100;
 var frame = 0;
 
@@ -225,13 +225,13 @@ function init_program(ctx){
 
 function draw_ctx(can, ctx, time){
     // Set time attribute
-    var tot_time = anim_len * anim_delay;
+    var tot_time = app.frames * anim_delay;
 
     var time = time ||
         parseFloat(
             ((new Date()).getTime() % tot_time)
                 /
-                tot_time
+                10
         );
     
     var timeAttribute = ctx.getUniformLocation(ctx.program, "time");
@@ -275,12 +275,12 @@ window.requestAnimationFrame(draw);
 setInterval(
     function(){
         frame++;
-        frame = frame % (anim_len);
+        frame = frame % (app.frames);
         
         window.requestAnimationFrame(function(){
             // When rendering gif, draw is done elsewhere
             if(!rendering_gif){
-                draw_ctx(gif_canvas, gif_ctx, (frame + 1)/(anim_len));
+                draw_ctx(gif_canvas, gif_ctx, (frame + 1)/10);
             }
         });
     }
@@ -302,8 +302,8 @@ function make_gif(){
     
     rendering_gif = true;
     
-    for(var i = 0; i < anim_len; i++){
-        draw_ctx(gif_canvas, gif_ctx, (i + 1)/anim_len);
+    for(var i = 0; i < app.frames; i++){
+        draw_ctx(gif_canvas, gif_ctx, (i + 1)/10);
         
         to_export.data.push(gif_canvas.toDataURL());
     }
@@ -321,7 +321,7 @@ function make_png(){
     var canvas = tempCanvas;
     
     canvas.width = gif_canvas.width;
-    canvas.height = gif_canvas.height * anim_len;
+    canvas.height = gif_canvas.height * app.frames;
     var ctx = canvas.getContext("2d");
 
     var i = 0;
@@ -334,9 +334,9 @@ function make_png(){
       when all are loaded: create image from canvas
      */
     function next(){
-        if(i < anim_len){
+        if(i < app.frames){
             var curr = i;
-            draw_ctx(gif_canvas, gif_ctx, (curr + 1)/anim_len);
+            draw_ctx(gif_canvas, gif_ctx, (curr + 1)/10);
             var image_data = gif_canvas.toDataURL();
             var temp_img = document.createElement("img");
             temp_img.src = image_data;
