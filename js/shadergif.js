@@ -112,12 +112,12 @@ var fragment_code = qsa("textarea[name='fragment']")[0];
 
 var f_editor = CodeMirror.fromTextArea(fragment_code, {
     lineNumbers: true,
-    mode: "x-shader/x-fragment"
+    mode: "x-shader/x-fragment",
+    indentUnit: 4
 });
 
 
 //f_editor.setCursor({line: 10, ch: 0});
-f_editor.addOverlay("dfdasfdd");
 
 // Fetch file and put it in textarea
 if(filename != ""){
