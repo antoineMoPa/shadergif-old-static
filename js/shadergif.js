@@ -31,7 +31,7 @@ var app = new Vue({
         canvas: null,
         error: "",
         code: default_fragment_policy(),
-	frames: 10,
+        frames: 10,
         width: 540,
         height: 540,
     },
@@ -149,12 +149,12 @@ function update_shader(){
 
 function add_error(err, type_str, type_pre){
     try{
-	var line = err.match(/^ERROR: [0-9]*:([0-9]*)/)[1];
-	line = parseInt(line) - 1;
-	var errline = f_editor.addLineClass(line, "background", "errorline");
-	cm_errorLines.push(errline);
+    var line = err.match(/^ERROR: [0-9]*:([0-9]*)/)[1];
+    line = parseInt(line) - 1;
+    var errline = f_editor.addLineClass(line, "background", "errorline");
+    cm_errorLines.push(errline);
     } finally {
-	type_pre.textContent =
+    type_pre.textContent =
             "Error in " + type_str + " shader.\n" +
             err;
     }
@@ -244,13 +244,13 @@ function draw_ctx(can, ctx, time){
     var iResolutionAttribute = ctx.getUniformLocation(ctx.program, "iResolution");
     
     ctx.uniform3fv(iResolutionAttribute,
-		   new Float32Array(
-		       [
-			   can.width,
-			   can.height,
-			   1.0
-		       ])
-		  );
+           new Float32Array(
+               [
+               can.width,
+               can.height,
+               1.0
+               ])
+          );
     
     // Screen ratio
     var ratio = can.width / can.height;
@@ -261,7 +261,6 @@ function draw_ctx(can, ctx, time){
     ctx.drawArrays(ctx.TRIANGLE_STRIP, 0, 4);
 
     ctx.viewport(0, 0, can.width, can.height);
-
 }
 
 var rendering_gif = false;
