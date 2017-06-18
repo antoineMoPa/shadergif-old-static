@@ -1,0 +1,7 @@
+1.0:
+
+ShaderGif Watermark, codemirror search.
+
+Before 1.0:
+
+A lot
