@@ -371,9 +371,10 @@ function make_png(){
             var temp_img = document.createElement("img");
             temp_img.src = image_data;
             temp_img.onload = function(){
-                ctx.drawImage(temp_img, 0, curr * gif_canvas.height);
+				var offset = curr * gif_canvas.height;
+                ctx.drawImage(temp_img, 0, offset);
 				ctx.fillStyle = "#ffffff";
-				ctx.fillText("ShaderGif",app.width - 60, app.height - 10);
+				ctx.fillText("ShaderGif",app.width - 60, app.height - 10 + offset);
                 next();
             }
         } else {
