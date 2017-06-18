@@ -292,25 +292,56 @@ var png_button = qsa("button[name='make-png']")[0];
 gif_button.addEventListener("click", make_gif);
 png_button.addEventListener("click", make_png);
 
-// Render all the frames to a gif
+// Render all the frames to a png
 function make_gif(){
-    var to_export = {};
+    rendering_gif = true;
+	
+	var to_export = {};
     
     to_export.delay = anim_delay;
     to_export.data = [];
+	
+    var tempCanvas = document.createElement("canvas");
+    var canvas = tempCanvas;
     
     rendering_gif = true;
-    
-    for(var i = 0; i < app.frames; i++){
-        draw_ctx(gif_canvas, gif_ctx, (i + 1)/10);
-        
-        to_export.data.push(gif_canvas.toDataURL());
-    }
+	
+    canvas.width = gif_canvas.width;
+    canvas.height = gif_canvas.height;
+    var ctx = canvas.getContext("2d");
 
-    rendering_gif = false;
+    var i = 0;
+
+    /*
+      "Unrolled" async loop:
+      for every image:
+      render & load image
+      onload: add to canvas
+      when all are loaded: create image from canvas
+     */
+    function next(){
+        if(i < app.frames){
+            var curr = i;
+            draw_ctx(gif_canvas, gif_ctx, (curr + 1)/10);
+            var image_data = gif_canvas.toDataURL();
+            var temp_img = document.createElement("img");
+            temp_img.src = image_data;
+            temp_img.onload = function(){
+                ctx.drawImage(temp_img, 0, 0);
+				ctx.fillStyle = "#ffffff";
+				ctx.fillText("ShaderGif",app.width - 60, app.height - 10);
+				to_export.data.push(canvas.toDataURL());
+                next();
+            }
+        } else {
+			export_gif(to_export);
+        }
+        i++;
+    }
     
-    export_gif(to_export);
+    next();
 }
+
 
 // Render all the frames to a png
 function make_png(){
@@ -341,6 +372,8 @@ function make_png(){
             temp_img.src = image_data;
             temp_img.onload = function(){
                 ctx.drawImage(temp_img, 0, curr * gif_canvas.height);
+				ctx.fillStyle = "#ffffff";
+				ctx.fillText("ShaderGif",app.width - 60, app.height - 10);
                 next();
             }
         } else {
