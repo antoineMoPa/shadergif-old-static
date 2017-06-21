@@ -34,8 +34,18 @@ var app = new Vue({
         frames: 10,
         width: 540,
         height: 540,
+		gifjs: {
+			quality: 8,
+			dithering: 'FloydSteinberg'
+		}
     },
     watch: {
+		'gifjs.dithering': function(d){
+			// Convert string to null
+			if(d == "false"){
+				this.gifjs.dithering = false;
+			}
+		},
         width: function(w){
             this.canvas.width = w;
         },
@@ -396,7 +406,8 @@ function make_png(){
 function export_gif(to_export){
     var gif = new GIF({
         workers: 2,
-        quality: 10,
+        quality: app.gifjs.quality,
+		dither: app.gifjs.dithering,
         workerScript: "gif-export/lib/gifjs/gif.worker.js"
     });
     
@@ -432,9 +443,35 @@ function export_gif(to_export){
             // Create image
             var img = dom("<img>");
             img.src = URL.createObjectURL(blob);
-
+			var size =  (blob.size / 1000).toFixed(2) + "kb";
+			var size_p = document.createElement("p");
+			size_p.classList.add("text-center");
+			size_p.innerText = size;
+			
             // Add it to the body
+			images_div.insertBefore(size_p, images_div.firstChild);
             images_div.insertBefore(img, images_div.firstChild);
+			
         })
     }
 }
+
+// Init UI
+
+(function(){
+	var foldables = qsa(".foldable");
+
+	function init_foldable(foldable){
+		var header = foldable.querySelectorAll(".foldable-header")[0];
+		var content = foldable.querySelectorAll(".foldable-content")[0];
+
+		header.addEventListener("click", function(e){
+			e.preventDefault();
+			foldable.classList.toggle("foldable-hidden");
+		});
+	}
+	
+	for(var i = 0; i < foldables.length; i++){
+		init_foldable(foldables[i]);
+	}
+})();

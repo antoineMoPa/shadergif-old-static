@@ -174,3 +174,45 @@ hr{
 }
 
 /* END CODEMIRROR */
+
+/* UI */
+
+.foldable{
+	margin:20px;
+	box-shadow:0 0 2px rgba(0,0,0,0.2);
+}
+
+.foldable-header{
+	background:#3af;
+	padding: 10px;
+	color:#fff;
+	position:relative;
+}
+
+/* icon */
+
+.foldable-header:after{
+	content:" ";
+	width:16px;
+	height:16px;
+	border: 1px solid #fff;
+	position:absolute;
+	top:10px;
+	right:10px;
+	transition:all 0.3s;
+}
+
+.foldable-hidden .foldable-header:after{
+	transform: rotateZ(45deg);
+}
+
+.foldable-hidden .foldable-content{
+	display:none;
+}
+
+.foldable-content{
+	padding-top:10px;
+	padding-bottom:10px;
+}
+
+/* END UI*/
