@@ -392,11 +392,8 @@ function make_png(){
         } else {
             // Final step
             var image_data = canvas.toDataURL();
-            var image = document.createElement("img");
-            image.src = image_data;
             rendering_gif = false;
-            var images_div = qsa(".result-images")[0];
-            images_div.insertBefore(image, images_div.firstChild);
+			app.images.unshift({size: false, src: image_data});
         }
         i++;
     }
@@ -443,7 +440,7 @@ function export_gif(to_export){
             // Create image
 			var size =  (blob.size / 1000).toFixed(2);
 
-			app.images.push({size: size, img: blob});
+			app.images.unshift({size: size, src: URL.createObjectURL(blob)});
         })
     }
 }
