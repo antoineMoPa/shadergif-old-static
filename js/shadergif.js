@@ -465,6 +465,9 @@ function export_gif(to_export){
 	}
 })();
 
+/*
+
+// Some work on server communication
 
 (function(){
 	var api = window.location.protocol + "//" + window.location.host + "o/shadergif_api";
@@ -483,3 +486,4 @@ function export_gif(to_export){
 		console.log(e);
     }
 })();
+*/

@@ -1,3 +1,7 @@
+1.0.2:
+
+Begin work on server + vuify image list
+
 1.0.1:
 
 Update gifjs, add settings (dither, quality), create nice foldable ui thing
