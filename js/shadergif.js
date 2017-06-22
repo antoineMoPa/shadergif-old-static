@@ -37,7 +37,8 @@ var app = new Vue({
 		gifjs: {
 			quality: 8,
 			dithering: 'FloydSteinberg'
-		}
+		},
+		images: []
     },
     watch: {
 		'gifjs.dithering': function(d){
@@ -140,6 +141,7 @@ if(filename != ""){
                 f_editor.setValue(val);
             }
         };
+		xhr.setRequestHeader('Content-type', 'text/plain');
         xhr.send();
     } catch (e){
         // Do nothing
@@ -437,21 +439,11 @@ function export_gif(to_export){
         
         gif.render();
         
-        var images_div = qsa(".result-images")[0];
-        
         gif.on('finished',function(blob){
             // Create image
-            var img = dom("<img>");
-            img.src = URL.createObjectURL(blob);
-			var size =  (blob.size / 1000).toFixed(2) + "kb";
-			var size_p = document.createElement("p");
-			size_p.classList.add("text-center");
-			size_p.innerText = size;
-			
-            // Add it to the body
-			images_div.insertBefore(size_p, images_div.firstChild);
-            images_div.insertBefore(img, images_div.firstChild);
-			
+			var size =  (blob.size / 1000).toFixed(2);
+
+			app.images.push({size: size, img: blob});
         })
     }
 }
@@ -474,4 +466,23 @@ function export_gif(to_export){
 	for(var i = 0; i < foldables.length; i++){
 		init_foldable(foldables[i]);
 	}
+})();
+
+
+(function(){
+	var api = window.location.protocol + "//" + window.location.host + "o/shadergif_api";
+	try{
+        var xhr = new XMLHttpRequest;
+        xhr.open('GET', api, true);
+		xhr.onreadystatechange = function(){
+			if (4 == xhr.readyState) {
+				console.log(xhr.responseText);
+			}
+        };
+		xhr.setRequestHeader('Content-type', 'application/json');
+        xhr.send();
+    } catch (e){
+		// Do nothing
+		console.log(e);
+    }
 })();

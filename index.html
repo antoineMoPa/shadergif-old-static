@@ -88,7 +88,10 @@
 				</div>
 				
 				<div class="result-images">
-					<span></span>
+					<div v-for="image in images">
+						<img v-bind:src="URL.createObjectURL(image.img)">
+						<p class="text-center">Size:{{ image.size }} kb</p>
+					</div>
 				</div>
 				
 				
