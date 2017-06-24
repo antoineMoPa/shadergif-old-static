@@ -10,7 +10,8 @@
   */
 
 var is_example = window.location.href.match(/\?file\=([_a-zA-Z0-9\/]+\.glsl)/);
-
+var DEFAULT_WIDTH = 540;
+var DEFAULT_HEIGHT = 540;
 var cm_errorLines = [];
 
 function default_fragment_policy(){
@@ -29,11 +30,12 @@ var app = new Vue({
     el: "#shadergif-app",
     data: {
         canvas: null,
+		sound_mode: false,
         error: "",
         code: default_fragment_policy(),
         frames: 10,
-        width: 540,
-        height: 540,
+        width: DEFAULT_WIDTH,
+        height: DEFAULT_HEIGHT,
 		gifjs: {
 			quality: 8,
 			dithering: 'FloydSteinberg'
@@ -58,7 +60,30 @@ var app = new Vue({
         code_change: function(){
             window.localStorage.code = this.code;
             update_shader();
-        }
+        },
+		play_sound: function(){
+			play_sound();
+		},
+		stop_sound: function(){
+			clearTimeout(timeout);
+			lastChunk = 0;
+			if(currentSource != null){
+				currentSource.stop();
+			}
+		},
+		enable_sound_mode: function(){
+			this.sound_mode = true;
+			this.width = 256;
+			this.height = 256;
+		},
+		disable_sound_mode: function(){
+			this.sound_mode = false;
+			this.stop_sound();
+		},
+		load_default_sound_shader: function(){
+			this.code = load_script("default-sound-shader");
+			f_editor.setValue(this.code);
+		}
     }
 });
 
@@ -85,19 +110,52 @@ if(is_example != null){
 
 // Canvas for making gifs
 var gif_canvas = qsa(".gif-canvas")[0];
-gif_canvas.width = 540;
-gif_canvas.height = 540;
 
-app.canvas = gif_canvas;
+{
+	gif_canvas.width = DEFAULT_WIDTH;
+	gif_canvas.height = DEFAULT_HEIGHT;
+	
+	app.canvas = gif_canvas;
+}
 
-var gif_ctx = gif_canvas.getContext("webgl");
-
+var gl = gif_canvas.getContext("webgl");
 var fragment_error_pre = qsa(".fragment-error-pre")[0];
 var vertex_error_pre = qsa(".vertex-error-pre")[0];
 
-init_ctx(gif_ctx);
+// Create render to texture stuff
+var framebuffer;
+var renderbuffer;
+
+init_ctx(gl);
+
+
+// Audio stuff
+var pixels = new Uint8Array(gif_canvas.width * gif_canvas.height * 4);
+var audioCtx = new AudioContext();
+var currentSource = null;
+var lastChunk = 0;
+var timeout = null;
 
 function init_ctx(ctx){
+	{
+		// Render to texture stuff
+		framebuffer = gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+		
+		rttTexture = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, rttTexture);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 256, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+		renderbuffer = gl.createRenderbuffer();
+		gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+		
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, rttTexture, 0);
+		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
+		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 256,256);
+	}
+
     ctx.clearColor(0.0, 0.0, 0.0, 1.0);
     ctx.enable(ctx.DEPTH_TEST);
     ctx.depthFunc(ctx.LEQUAL);
@@ -127,9 +185,6 @@ var f_editor = CodeMirror.fromTextArea(fragment_code, {
     indentUnit: 4
 });
 
-
-//f_editor.setCursor({line: 10, ch: 0});
-
 // Fetch file and put it in textarea
 if(filename != ""){
     try{
@@ -156,7 +211,7 @@ f_editor.on("change", function(){
 update_shader();
 
 function update_shader(){
-    init_program(gif_ctx);
+    init_program(gl);
 }
 
 function add_error(err, type_str, type_pre){
@@ -236,43 +291,62 @@ function init_program(ctx){
 }
 
 function draw_ctx(can, ctx, time){
-    // Set time attribute
-    var tot_time = app.frames * anim_delay;
+	for(var pass = 0; pass < 2; pass++ ){
+		if(pass == 0){
+			ctx.bindFramebuffer(ctx.FRAMEBUFFER, framebuffer);
+		} else {
+			ctx.bindFramebuffer(ctx.FRAMEBUFFER, null);
+		}
 
-    var time = time ||
-        parseFloat(
-            ((new Date()).getTime() % tot_time)
-                /
-                10
-        );
-    
-    var timeAttribute = ctx.getUniformLocation(ctx.program, "time");
-    ctx.uniform1f(timeAttribute, time);
+		gl.bindTexture(gl.TEXTURE_2D, rttTexture);
+		gl.uniform1i(gl.getUniformLocation(ctx.program, 'last'), 0);
 
-    var iGlobalTimeAttribute = ctx.getUniformLocation(ctx.program, "iGlobalTime");
-    var date = new Date();
-    var time = (date.getTime() % (3600 * 24)) / 1000.0;
-    ctx.uniform1f(iGlobalTimeAttribute, time);
-    var iResolutionAttribute = ctx.getUniformLocation(ctx.program, "iResolution");
-    
-    ctx.uniform3fv(iResolutionAttribute,
-           new Float32Array(
-               [
-               can.width,
-               can.height,
-               1.0
-               ])
-          );
-    
-    // Screen ratio
-    var ratio = can.width / can.height;
+		var passAttribute = ctx.getUniformLocation(ctx.program, "pass");
+		ctx.uniform1i(passAttribute, pass);
+4		
 
-    var ratioAttribute = ctx.getUniformLocation(ctx.program, "ratio");
-    ctx.uniform1f(ratioAttribute, ratio);
+		var soundTimeAttribute = ctx.getUniformLocation(ctx.program, "soundTime");
+		ctx.uniform1f(soundTimeAttribute, lastChunk);
 
-    ctx.drawArrays(ctx.TRIANGLE_STRIP, 0, 4);
-
-    ctx.viewport(0, 0, can.width, can.height);
+		
+		// Set time attribute
+		var tot_time = app.frames * anim_delay;
+		
+		var time = time ||
+			parseFloat(
+				((new Date()).getTime() % tot_time)
+					/
+					10
+			);
+		
+		var timeAttribute = ctx.getUniformLocation(ctx.program, "time");
+		ctx.uniform1f(timeAttribute, time);
+		
+		var iGlobalTimeAttribute = ctx.getUniformLocation(ctx.program, "iGlobalTime");
+		var date = new Date();
+		var time = (date.getTime() % (3600 * 24)) / 1000.0;
+		ctx.uniform1f(iGlobalTimeAttribute, time);
+		var iResolutionAttribute = ctx.getUniformLocation(ctx.program, "iResolution");
+		
+		ctx.uniform3fv(iResolutionAttribute,
+					   new Float32Array(
+						   [
+							   can.width,
+							   can.height,
+							   1.0
+						   ])
+					  );
+		
+		// Screen ratio
+		var ratio = can.width / can.height;
+		
+		var ratioAttribute = ctx.getUniformLocation(ctx.program, "ratio");
+		ctx.uniform1f(ratioAttribute, ratio);
+		
+		ctx.drawArrays(ctx.TRIANGLE_STRIP, 0, 4);
+		
+		ctx.viewport(0, 0, can.width, can.height);
+	}
 }
 
 var rendering_gif = false;
@@ -291,7 +365,7 @@ setInterval(
         window.requestAnimationFrame(function(){
             // When rendering gif, draw is done elsewhere
             if(!rendering_gif){
-                draw_ctx(gif_canvas, gif_ctx, (frame + 1)/10);
+                draw_ctx(gif_canvas, gl, (frame + 1)/10);
             }
         });
     }
@@ -334,7 +408,7 @@ function make_gif(){
     function next(){
         if(i < app.frames){
             var curr = i;
-            draw_ctx(gif_canvas, gif_ctx, (curr + 1)/10);
+            draw_ctx(gif_canvas, gl, (curr + 1)/10);
             var image_data = gif_canvas.toDataURL();
             var temp_img = document.createElement("img");
             temp_img.src = image_data;
@@ -378,7 +452,7 @@ function make_png(){
     function next(){
         if(i < app.frames){
             var curr = i;
-            draw_ctx(gif_canvas, gif_ctx, (curr + 1)/10);
+            draw_ctx(gif_canvas, gl, (curr + 1)/10);
             var image_data = gif_canvas.toDataURL();
             var temp_img = document.createElement("img");
             temp_img.src = image_data;
@@ -464,6 +538,54 @@ function export_gif(to_export){
 		init_foldable(foldables[i]);
 	}
 })();
+
+// Render all the frames
+function play_sound(){
+    draw_ctx(gif_canvas, gl);
+	gl.readPixels(0, 0, gif_canvas.width, gif_canvas.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+
+	// Get an AudioBufferSourceNode.
+	// This is the AudioNode to use when we want to play an AudioBuffer
+	var source = audioCtx.createBufferSource();
+	var frameCount = audioCtx.sampleRate * 1.0;
+	var myArrayBuffer = audioCtx.createBuffer(1, 48000, 48000);
+	var nowBuffering = myArrayBuffer.getChannelData(0);
+
+	currentSource = source;
+	
+	var i = 0;
+	var j = 0;
+
+	while(j < 48000){
+		// Copy and skip alpha
+		nowBuffering[j+0] = (pixels[i+0]/255) - 0.5;
+		nowBuffering[j+1] = (pixels[i+1]/255) - 0.5;
+		nowBuffering[j+2] = (pixels[i+2]/255) - 0.5;
+		i+=4;
+		j+=3;
+	}
+
+	// set the buffer in the AudioBufferSourceNode
+	source.buffer = myArrayBuffer;
+	
+	// connect the AudioBufferSourceNode to the
+	// destination so we can hear the sound
+	source.connect(audioCtx.destination);
+	
+	if(lastChunk == 0){
+		// start the source playing
+		source.start(0);
+		lastChunk = audioCtx.currentTime + 1;
+	} else {
+		source.start(lastChunk);
+		lastChunk += 1;
+	}
+
+	// Find some resonable time for next computation
+	var deltat = (lastChunk - audioCtx.currentTime) * 1000 - 500;
+	timeout = setTimeout(play_sound,deltat);
+}
+
 
 /*
 
