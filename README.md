@@ -18,6 +18,12 @@ Switch to this branch for volumetric fun.
 
 http://a-mo-pa.com/stuff/shadervolume/
 
+## Sound
+
+Switch to this branch to create sound with your GPU
+
+http://a-mo-pa.com/stuff/shadersound/
+
 # Uniforms
 
 time - goes from 0.0 to 1.0 and repeats
