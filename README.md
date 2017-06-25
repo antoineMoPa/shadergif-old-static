@@ -2,7 +2,7 @@
 
 A tool to play with fragment shaders to create nice 2D images. (Because fragment shaders are awesome.)
 
-Features gif export. (To export a 10 frame gif).
+Features gif export, png export & GPU sound creation.
 
 # Branches
 
@@ -17,12 +17,6 @@ http://a-mo-pa.com/stuff/shadergif/
 Switch to this branch for volumetric fun.
 
 http://a-mo-pa.com/stuff/shadervolume/
-
-## Sound
-
-Switch to this branch to create sound with your GPU
-
-http://a-mo-pa.com/stuff/shadersound/
 
 # Uniforms
 
