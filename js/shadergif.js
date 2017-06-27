@@ -34,6 +34,7 @@ var app = new Vue({
         error: "",
         code: default_fragment_policy(),
         frames: 10,
+		passes: 1,
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,
 		gifjs: {
@@ -51,12 +52,20 @@ var app = new Vue({
 		},
         width: function(w){
             this.canvas.width = w;
+			this.re_init_ctx();
         },
         height: function(h){
             this.canvas.height = h;
-        }
+			this.re_init_ctx();
+        },
+		passes: function(){
+			this.re_init_ctx();
+		}
     },
     methods: {
+		re_init_ctx: function(){
+			init_ctx(gl);
+		},
         code_change: function(){
             window.localStorage.code = this.code;
             update_shader();
@@ -123,11 +132,12 @@ var fragment_error_pre = qsa(".fragment-error-pre")[0];
 var vertex_error_pre = qsa(".vertex-error-pre")[0];
 
 // Create render to texture stuff
-var framebuffer;
-var renderbuffer;
+var rttTexture = [];
+var framebuffer = [];
+var renderbuffer = [];
+var renderBufferDim = [];
 
 init_ctx(gl);
-
 
 // Audio stuff
 var pixels = new Uint8Array(gif_canvas.width * gif_canvas.height * 4);
@@ -137,23 +147,44 @@ var lastChunk = 0;
 var timeout = null;
 
 function init_ctx(ctx){
-	{
-		// Render to texture stuff
-		framebuffer = gl.createFramebuffer();
-		gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-		
-		rttTexture = gl.createTexture();
-		gl.bindTexture(gl.TEXTURE_2D, rttTexture);
+	var ww = 2;
+	var hh = 2;
+
+	// Delete previous textures
+	for(var i = 0; i < rttTexture.length; i++){
+		gl.deleteTexture(rttTexture[i]);
+		gl.deleteRenderbuffer(renderbuffer[i]);
+		gl.deleteFramebuffer(framebuffer[i]);
+	}
+	
+	// Find nearest power of 2 above width and height
+	while(app.width > ww){
+		ww <<= 1;
+	}
+	while(app.height > hh){
+		hh <<= 1;
+	}
+
+	renderBufferDim = [ww, hh];
+	
+	for(var i = 0; i < 10; i++){
+		rttTexture[i] = gl.createTexture();
+		gl.bindTexture(gl.TEXTURE_2D, rttTexture[i]);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 		
-		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 256, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, ww, hh, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+
+		// Render to texture stuff
+		framebuffer[i] = gl.createFramebuffer();
+		gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer[i]);
+		
 		renderbuffer = gl.createRenderbuffer();
 		gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
 		
-		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, rttTexture, 0);
-		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer);
-		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, 256,256);
+		gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, rttTexture[i], 0);
+		gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, renderbuffer[i]);
+		gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, ww, hh);
 	}
 
     ctx.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -291,24 +322,32 @@ function init_program(ctx){
 }
 
 function draw_ctx(can, ctx, time){
-	for(var pass = 0; pass < 2; pass++ ){
-		if(pass == 0){
-			ctx.bindFramebuffer(ctx.FRAMEBUFFER, framebuffer);
+	for(var pass = 0; pass < app.passes; pass++ ){
+		if(pass < app.passes - 1){
+			ctx.bindFramebuffer(ctx.FRAMEBUFFER, framebuffer[pass]);
 		} else {
 			ctx.bindFramebuffer(ctx.FRAMEBUFFER, null);
 		}
 
-		gl.bindTexture(gl.TEXTURE_2D, rttTexture);
-		gl.uniform1i(gl.getUniformLocation(ctx.program, 'last'), 0);
-
+		if(pass > 0){
+			gl.bindTexture(gl.TEXTURE_2D, rttTexture[pass - 1]);
+			gl.uniform1i(gl.getUniformLocation(ctx.program, 'lastPass'), 0);
+		}
+		
+		gl.uniform2fv(
+			gl.getUniformLocation(ctx.program, 'renderBufferRatio'),
+			[
+				renderBufferDim[0] / app.width,
+				renderBufferDim[1] / app.height
+			]
+		);
+		
 		var passAttribute = ctx.getUniformLocation(ctx.program, "pass");
-		ctx.uniform1i(passAttribute, pass);
-4		
+		ctx.uniform1i(passAttribute, pass + 1);
 
 		var soundTimeAttribute = ctx.getUniformLocation(ctx.program, "soundTime");
 		ctx.uniform1f(soundTimeAttribute, lastChunk);
 
-		
 		// Set time attribute
 		var tot_time = app.frames * anim_delay;
 		
@@ -421,6 +460,7 @@ function make_gif(){
             }
         } else {
 			export_gif(to_export);
+			rendering_gif = false;
         }
         i++;
     }
