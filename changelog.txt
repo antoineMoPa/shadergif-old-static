@@ -1,3 +1,8 @@
+1.0.3:
+
+Manually merge shadersound into master, providing GPU sound
+Allow multiple passes (render to texture)
+
 1.0.2:
 
 Begin work on server + vuify image list

@@ -3,11 +3,11 @@
 	<head>
 		<meta charset="utf-8">
 		<title>ShaderGif</title>
-		<link rel="stylesheet" href="js/lib/codemirror/lib/codemirror.css?version=1.0.2">
-		<link rel="stylesheet" href="js/lib/codemirror/addon/dialog/dialog.css?version=1.0.2">
-		<link rel="stylesheet" href="js/lib/codemirror/addon/search/matchesonscrollbar.css?version=1.0.2">
-		<link rel="stylesheet" href="css/base.css?version=1.0.2">
-		<link rel="stylesheet" href="css/style.css?version=1.0.2">
+		<link rel="stylesheet" href="js/lib/codemirror/lib/codemirror.css?version=1.0.3">
+		<link rel="stylesheet" href="js/lib/codemirror/addon/dialog/dialog.css?version=1.0.3">
+		<link rel="stylesheet" href="js/lib/codemirror/addon/search/matchesonscrollbar.css?version=1.0.3">
+		<link rel="stylesheet" href="css/base.css?version=1.0.3">
+		<link rel="stylesheet" href="css/style.css?version=1.0.3">
 	</head>
 	<body>
 		<header>
@@ -173,15 +173,15 @@ varying vec2 UV;
 uniform float soundTime;
 uniform int pass;
 
-uniform sampler2D last;
+uniform sampler2D lastPass;
 
 #define PI 3.14159265359
 #define PI2 6.28318530718
 
-vec4 pass1(){
+vec4 pass2(){
     vec4 col = vec4(0.0);
 	
-	col += texture2D(last, UV.xy);
+	col += texture2D(lastPass, UV.xy);
     	
     return col;
 }
@@ -199,7 +199,7 @@ float val(float t){
     return signal;
 }
 
-vec4 pass0(){
+vec4 pass1(){
     vec4 col = vec4(0.0);
 	
     float sr = 48000.0;
@@ -228,11 +228,11 @@ vec4 pass0(){
 void main(){
     vec4 col = vec4(0.0);
 	
-	if(pass == 0){
-		col += pass0();
-        
-	} else if(pass == 1){
+	if(pass == 1){
 		col += pass1();
+        
+	} else if(pass == 2){
+		col += pass2();
 	}
 
     gl_FragColor = col;
@@ -254,18 +254,18 @@ void main(){
 		</script>
 
 
-		<script src="js/lib/codemirror/lib/codemirror.js?version=1.0.2"></script>
-		<script src="js/lib/codemirror/addon/dialog/dialog.js?version=1.0.2"></script>
-		<script src="js/lib/codemirror/addon/search/searchcursor.js?version=1.0.2"></script>
-		<script src="js/lib/codemirror/addon/search/search.js?version=1.0.2"></script>
-		<script src="js/lib/codemirror/addon/scroll/annotatescrollbar.js?version=1.0.2"></script>
-		<script src="js/lib/codemirror/addon/search/matchesonscrollbar.js?version=1.0.2"></script>
+		<script src="js/lib/codemirror/lib/codemirror.js?version=1.0.3"></script>
+		<script src="js/lib/codemirror/addon/dialog/dialog.js?version=1.0.3"></script>
+		<script src="js/lib/codemirror/addon/search/searchcursor.js?version=1.0.3"></script>
+		<script src="js/lib/codemirror/addon/search/search.js?version=1.0.3"></script>
+		<script src="js/lib/codemirror/addon/scroll/annotatescrollbar.js?version=1.0.3"></script>
+		<script src="js/lib/codemirror/addon/search/matchesonscrollbar.js?version=1.0.3"></script>
 		
-		<script src="js/lib/codemirror-webgl-clike.js?version=1.0.2"></script>
+		<script src="js/lib/codemirror-webgl-clike.js?version=1.0.3"></script>
 		
-		<script src="js/lib/vue.min.js?version=1.0.2"></script>
-		<script src="js/lib/base.js?version=1.0.2"></script>
-		<script src="gif-export/lib/gifjs/gif.js?version=1.0.2"></script>
-		<script src="js/shadergif.js?version=1.0.2"></script>
+		<script src="js/lib/vue.min.js?version=1.0.3"></script>
+		<script src="js/lib/base.js?version=1.0.3"></script>
+		<script src="gif-export/lib/gifjs/gif.js?version=1.0.3"></script>
+		<script src="js/shadergif.js?version=1.0.3"></script>
 	</body>
 </html>

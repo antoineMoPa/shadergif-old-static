@@ -82,8 +82,10 @@ var app = new Vue({
 		},
 		enable_sound_mode: function(){
 			this.sound_mode = true;
+			this.passes = 2;
 			this.width = 256;
 			this.height = 256;
+			this.re_init_ctx();
 		},
 		disable_sound_mode: function(){
 			this.sound_mode = false;
@@ -588,8 +590,8 @@ function play_sound(){
 	// This is the AudioNode to use when we want to play an AudioBuffer
 	var source = audioCtx.createBufferSource();
 	var frameCount = audioCtx.sampleRate * 1.0;
-	var myArrayBuffer = audioCtx.createBuffer(1, 48000, 48000);
-	var nowBuffering = myArrayBuffer.getChannelData(0);
+	var audioArrayBuffer = audioCtx.createBuffer(1, 48000, 48000);
+	var nowBuffering = audioArrayBuffer.getChannelData(0);
 
 	currentSource = source;
 	
@@ -606,7 +608,7 @@ function play_sound(){
 	}
 
 	// set the buffer in the AudioBufferSourceNode
-	source.buffer = myArrayBuffer;
+	source.buffer = audioArrayBuffer;
 	
 	// connect the AudioBufferSourceNode to the
 	// destination so we can hear the sound
