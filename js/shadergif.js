@@ -227,6 +227,14 @@ if(filename != ""){
             if (4 == xhr.readyState) {
                 var val = xhr.responseText;
                 f_editor.setValue(val);
+				
+				// Change URL to avoid erasing user text
+				// when reloading next time.
+				window.history.pushState(
+					{},
+					"ShaderGif",
+					window.location.href.replace(/\?.*$/, "", "")
+				);
             }
         };
 		xhr.setRequestHeader('Content-type', 'text/plain');
