@@ -353,7 +353,6 @@ function init_program(ctx){
     
     ctx.enableVertexAttribArray(positionAttribute);
     ctx.vertexAttribPointer(positionAttribute, 3, ctx.FLOAT, false, 0, 0);
-    
 }
 
 function draw_ctx(can, ctx, time){
@@ -364,9 +363,24 @@ function draw_ctx(can, ctx, time){
 			ctx.bindFramebuffer(ctx.FRAMEBUFFER, null);
 		}
 
+		// Manage lastpass
 		if(pass > 0){
+			gl.activeTexture(gl.TEXTURE0);
 			gl.bindTexture(gl.TEXTURE_2D, rttTexture[pass - 1]);
-			gl.uniform1i(gl.getUniformLocation(ctx.program, 'lastPass'), 0);
+			gl.uniform1i(gl.getUniformLocation(ctx.program, 'lastPass'), pass - 1);
+		}
+		
+		
+		for(var i = 0; i < app.passes; i++){
+			gl.activeTexture(gl.TEXTURE0 + i);
+			if(i == pass){
+				// Unbind current to prevent feedback loop
+				gl.bindTexture(gl.TEXTURE_2D, null);
+				continue;
+			}
+			var att = gl.getUniformLocation(ctx.program, "pass" + i);
+			gl.bindTexture(gl.TEXTURE_2D, rttTexture[i]);
+			gl.uniform1i(att,i);
 		}
 		
 		gl.uniform2fv(
