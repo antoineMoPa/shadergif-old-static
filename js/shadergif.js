@@ -35,12 +35,14 @@ var app = new Vue({
         code: default_fragment_policy(),
         frames: 10,
 		passes: 1,
+		passes_defined_in_code: false,
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,
 		gifjs: {
 			quality: 8,
 			dithering: 'FloydSteinberg'
 		},
+		autocompile: true,
 		images: []
     },
     watch: {
@@ -68,8 +70,27 @@ var app = new Vue({
 		},
         code_change: function(){
             window.localStorage.code = this.code;
-            update_shader();
+			if(this.autocompile){
+				update_shader();
+			}
+			this.manage_passes();
         },
+	 	manage_passes: function(){
+			var c = this.code;
+			// Verify if passes is set there
+			var re = /\/\/PASSES=([0-6])/;
+			var result = re.exec(c);
+			
+			if(result == null){
+				this.passes_defined_in_code = false;
+			} else {
+				this.passes_defined_in_code = true;
+				this.passes = parseInt(result[1]);
+			}
+		},
+		recompile: function(){
+			update_shader();
+		},
 		play_sound: function(){
 			play_sound();
 		},
@@ -97,6 +118,10 @@ var app = new Vue({
 		}
     }
 });
+
+// In case passes is set in code,
+// set it at page load:
+app.manage_passes();
 
 function resize(){
     var parent = qsa(".vertical-scroll-parent")[0];

@@ -46,6 +46,19 @@
 									Create stacked png
 								</button>
 							</p>
+							<p>
+								<label for="autocompile">
+									Automatically recompile while typing
+								</label>
+								<input id="autocompile" type="checkbox" v-model="autocompile">
+							</p>
+							<p>
+								<button name="recompile"
+										v-if="!autocompile"
+										v-on:click="recompile">
+									Compile and run
+								</button>
+							</p>
 						</div>
 						<div class="text-center">
 							<div class="settings inline-block">
@@ -53,7 +66,15 @@
 									w:<input type="number" v-model.lazy="width">
 									h:<input type="number" v-model.lazy="height">
 									frames:<input type="number" v-model.lazy="frames">
-									passes:<input type="number" min="1" max="10" v-model.lazy="passes">
+									passes: <input
+												 v-if="!passes_defined_in_code"
+												 type="number"
+												 min="1"
+												 max="10"
+												 v-model.lazy="passes">
+									<span v-if="passes_defined_in_code">
+										{{ passes }} (defined in code)
+									</span>
 								</p>
 							</div>
 						</div>
