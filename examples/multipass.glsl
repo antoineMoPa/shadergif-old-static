@@ -1,5 +1,4 @@
-/* FOR THIS TO WORK, YOU MUST SET PASSES TO 3 in GIF TOOLS PANEL */
-
+//PASSES=3
 precision highp float;
 
 varying vec2 UV;
