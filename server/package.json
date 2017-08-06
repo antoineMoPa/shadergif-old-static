@@ -1,8 +1,0 @@
-{
-    "name": "shadergif_server",
-    "description": "A server for shadergif",
-    "version": "0.0.1",
-    "dependencies": {
-        "express": "3.x"
-    }
-}
