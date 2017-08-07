@@ -4,6 +4,18 @@ A tool to play with fragment shaders to create nice 2D images. (Because fragment
 
 Features gif export, png export & GPU sound creation.
 
+# Trying the server
+
+The small bash server allows to send images efficiently to your computer.
+
+Currently, if you want to use the server, you have to install apache2 and shadergif in your public html folder. Reason: CORS request are setup to only support 127.0.0.1 . This will probably change in the future.
+
+Then, you can start the server:
+
+    bash start_server.sh
+
+When you visit http://127.0.0.1/wherever_you_installed_shadergif, you should see a new button ("Send to server"). The images will be stored in ~/shadergif-images/.
+		
 # Branches
 
 ## Master
