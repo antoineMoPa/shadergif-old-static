@@ -1,0 +1,31 @@
+#!/bin/bash
+
+PORT=4002
+
+if [[ $HACKY_CONTEXT = "APP" ]]; then
+	root_folder=$HACKY_APP_FOLDER
+else
+	cat doc/serve.md
+	exit
+fi
+
+function serve {
+	while true;
+	do
+		if ! nc -c "./hacky serve-one $root_folder" -l -p $PORT; then
+			# CTRL+C: exit
+			exit
+		fi
+	done;
+}
+
+echo "serving public folder"
+echo "listening at port $PORT"
+
+# Start a couple of servers
+# (otherwise, it sometimes cannot handle the load)
+for i in $(seq 1 10); do
+	serve &
+done
+
+serve

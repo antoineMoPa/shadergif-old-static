@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for i in $(ls native); do
+	PWD=$(pwd)
+	cd native/$i
+	make install
+	cd $PWD
+done

@@ -1,0 +1,5 @@
+ Native executables
+*.native
+
+# Editor backups
+*~

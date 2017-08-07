@@ -1,0 +1,53 @@
+#!/bin/bash
+
+if [[ $HACKY_CONTEXT = "APP" ]]; then
+	root_folder=$HACKY_APP_FOLDER
+else
+	cat doc/standalone.md
+	exit
+fi
+
+hacky_folder=$(pwd)
+cd $HACKY_APP_FOLDER
+
+# Find app name from folder path
+app_name=$(echo $HACKY_APP_FOLDER | rev | cut -d"/" -f1 | rev)
+
+folder=$app_name".standalone"
+
+if [ -e $folder ]; then
+	echo "folder $folder already exists"
+	echo "Please move it somewhere else or remove it."
+	exit
+fi
+
+echo "Packaging "$app_name" in "$folder
+
+mkdir $folder
+
+# Files to ignore while copying app and hacky into
+# standalone folder
+ignore="\.standalone"
+ignore=$ignore"\|~"
+ignore=$ignore"\|apps"
+
+for i in $(ls | grep -v $ignore); do
+	cp -r $i $folder"/"
+done
+
+
+cd $folder
+
+# Create _hacky folder containing hacky system
+mkdir "_hacky"
+cd "_hacky"
+
+# Copy hacky system
+for i in $(ls $hacky_folder | grep -v $ignore); do
+	cp -r $hacky_folder"/"$i .
+done
+
+
+
+
+

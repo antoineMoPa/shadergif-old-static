@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>appname</title>
+		<meta name="viewport" content="width=device-width">
+		<link rel="stylesheet" media="all" type="text/css" href="/deps/bootstrap.min.css">
+		<script src="/deps/vue.js" type="text/javascript"></script>
+		<script src="/deps/zepto.js" type="text/javascript"></script>
+	</head>
+	<body>
+		<h2>Hello!</h2>
+		<p>This file is in apps/appname/public/index.html</p>
+		<script type="text/javascript">
+			// Make an API call:
+			$.get("/api/hello.sh", function(response){
+				console.log(response);
+			});
+		</script>
+	</body>
+</html>

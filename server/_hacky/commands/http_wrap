@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Read stdin to $buffer
+buffer=$(cat)
+
+# Find content-length
+len=$(echo "$buffer" | wc -c)
+
+# Echo header
+echo "HTTP/1.1 $1"
+echo "Content-type: $2"
+echo "Content-Encoding: UTF-8"
+echo "Content-Length: "$len
+echo "Connection: close"
+echo ""
+
+# Echo buffer
+echo "$buffer"

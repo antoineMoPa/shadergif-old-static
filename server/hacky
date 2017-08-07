@@ -1,0 +1,14 @@
+#!/bin/bash
+
+app_folder=$(pwd)
+
+if [[ -e "_hacky" ]]; then
+	# Use _hacky folder
+	cd _hacky
+else
+	# Assume that this is a hacky app in /apps/appname
+	cd ../..
+fi
+
+# Just call hacky
+HACKY_CONTEXT="APP" HACKY_APP_FOLDER=$app_folder ./hacky "$@"

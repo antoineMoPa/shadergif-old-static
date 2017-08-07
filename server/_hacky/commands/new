@@ -1,0 +1,35 @@
+#!/bin/bash
+
+if [[ $HACKY_CONTEXT = "APP" ]]; then
+	echo "Please run new in hacky folder. (currently in an app)"
+	exit
+fi
+
+
+if [ $# -lt 2 ]; then
+	cat doc/new.md
+elif [[ "$1" = "app" ]]; then
+	if [[ -e apps/$2 ]]; then
+		echo "Error: apps/$2 already exists"
+	else
+		echo "Creating app \""$2"\" in \"apps/"$2"\""
+		name=$2
+		cp -r templates/app/apps-folder/appname apps/$name
+		cd apps/$name
+		sed -i "s/appname/$name/g" public/index.html
+		./hacky install
+	fi
+elif [[ "$1" = "native" ]]; then
+	if [[ -e native/$2 ]]; then
+		echo "Error: native/$2 already exists"
+	else
+		echo "Creating native command \""$2"\" in \"native/"$2"\""
+		name=$2
+		cp -r templates/native/native-folder/nativename native/$name
+		cd native/$name
+		mv nativename.cpp $name.cpp
+		sed -i "s/nativename/$name/g" Makefile 
+	fi
+else
+	cat doc/new.md
+fi

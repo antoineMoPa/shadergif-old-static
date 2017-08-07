@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ $# = 0 ]; then
+	if [[ $HACKY_CONTEXT = "APP" ]]; then
+		cat doc/hacky-app.md
+	else
+		cat doc/hacky.md
+	fi
+else
+	./commands/"$@"
+fi
+
+

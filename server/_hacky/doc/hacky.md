@@ -1,0 +1,4 @@
+Try doing:
+
+	./hacky new
+

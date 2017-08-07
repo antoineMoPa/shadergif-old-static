@@ -1,0 +1,99 @@
+#!/bin/bash
+
+root_folder=$1"/public"
+api_folder=$1"/api"
+
+http_wrap_command="./commands/http_wrap"
+
+if [[ -e "./commands/http_wrap.native" ]]; then
+	http_wrap_command="./commands/http_wrap.native"
+fi
+
+function route {
+	if [[ "$2" == "" ]]; then
+		show_file $root_folder"/index.html"
+	elif [[ "$2" == "api" ]]; then
+		# remove url part after question mark (?)
+		file=$(echo $3 | sed "s/\?.*//")
+		if [[ -e "$api_folder/$file" ]]; then
+			. "$api_folder/$file"
+		else
+			# Error
+			show_file $root_folder"/404.html"
+		fi
+	else
+		filepath=$root_folder$1
+		# Try serving the file if it exists
+		if [[ -e "$filepath" ]]; then
+			show_file $filepath
+		else
+			# Error
+			show_file $root_folder"/404.html"
+		fi
+	fi
+}
+
+function get_mime {
+	if [[ "$1" =~ \.html$ ]]; then
+		echo "text/html"
+	elif [[ "$1" =~ \.css$ ]]; then
+		echo "text/css"
+	elif [[ "$1" =~ \.js$ ]]; then
+		echo "text/javascript"
+	else
+		echo "text/plain"
+	fi
+}
+
+function show_file {
+	if [[ -e "$1" ]]; then
+		if [[ "$1" =~ \.css|\.js|\.html$ ]]; then
+			mime=$(get_mime "$1")
+			$http_wrap_command "200 OK" $mime < <(cat $1)
+		else
+			$http_wrap_command "502 FORBIDEN" "text/plain" < <(echo "forbiden")
+		fi
+	else
+		$http_wrap_command "404 Not Found" < <(echo "404 $1")
+	fi
+}
+
+function parse {
+	REQ=""
+	line=""
+	lcount=0
+	
+	url=""
+	
+	while read -r line;
+	do
+		line=$(echo $line | sed "s/^\s$/\n/g")
+		REQ="${REQ}${line}"
+		
+		if [ -z "${line}" ]; then
+			
+			url1=$(echo $url | cut -d "/" -f2)
+			url2=$(echo $url | cut -d "/" -f3)
+			url3=$(echo $url | cut -d "/" -f3)
+			url4=$(echo $url | cut -d "/" -f3)
+			
+			# route and reply
+			route $url $url1 $url2 $url3 $url4
+			
+			exit
+		else
+			lcount=$(($lcount+1))
+			
+			line=$(echo $line| sed "s/\r//g")
+			
+			if [ $lcount = 1 ]; then
+				# find path
+				# (by removing GET/POST and HTTP)
+				url=$(echo $line | sed "s/GET \|POST \|OPTIONS //g" | sed "s/ HTTP\/[0-9\.]*//g")
+				
+			fi
+		fi
+	done
+}
+
+parse

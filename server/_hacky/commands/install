@@ -1,0 +1,33 @@
+#!/bin/bash
+
+function install_wget_deps {
+	folder=$1
+
+	cd $1
+	
+	# Create deps folder if it does not exist
+	# [Problem possible if deps is a file...]
+	if [[ ! -e "deps" ]]; then
+		mkdir deps
+	fi
+	
+	if [[ -e "wget.deps" ]]; then
+		for dep in $(cat wget.deps); do
+			# -N: download if new available
+			wget -N --no-verbose $dep -P deps
+		done
+		echo "done installing wget dependencies"
+	else
+		echo "No wget dependencies to install"
+	fi
+}
+
+if [[ "$HACKY_CONTEXT" = "APP" ]]; then
+	echo "Installing dependencies in " $HACKY_APP_FOLDER
+	install_wget_deps $HACKY_APP_FOLDER"/public"
+	
+else
+	cat doc/install.md
+fi
+
+
