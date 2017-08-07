@@ -40,7 +40,7 @@
 							<p>
 								<button name="send-to-server" class="inline-block"
 										v-on:click="send_to_server">
-									Send to server
+									Send to server {{ send_status }}
 								</button>
 								<button name="make-gif" class="inline-block">
 									Create gif
@@ -68,7 +68,14 @@
 								<p>
 									w:<input type="number" v-model.lazy="width">
 									h:<input type="number" v-model.lazy="height">
-									frames:<input type="number" v-model.lazy="frames">
+									frames:<input type="number"
+												  v-if="!frames_defined_in_code"
+												  v-model.lazy="frames">
+									<span v-if="frames_defined_in_code"
+										  title="(defined in code)">
+										{{ frames }}
+									</span>
+
 									passes: <input
 												 v-if="!passes_defined_in_code"
 												 type="number"

@@ -31,11 +31,13 @@ var app = new Vue({
     data: {
         canvas: null,
 		sound_mode: false,
+		send_status: "",
         error: "",
         code: default_fragment_policy(),
         frames: 10,
 		passes: 1,
 		passes_defined_in_code: false,
+		frames_defined_in_code: false,
         width: DEFAULT_WIDTH,
         height: DEFAULT_HEIGHT,
 		gifjs: {
@@ -86,6 +88,17 @@ var app = new Vue({
 			} else {
 				this.passes_defined_in_code = true;
 				this.passes = parseInt(result[1]);
+			}
+
+			// Verify if frames is set in code
+			var re = /\/\/FRAMES=([0-9]*)/;
+			var result = re.exec(c);
+			
+			if(result == null){
+				this.frames_defined_in_code = false;
+			} else {
+				this.frames_defined_in_code = true;
+				this.frames = parseInt(result[1]);
 			}
 		},
 		recompile: function(){
@@ -563,9 +576,15 @@ function make_png_server(){
             var curr = i;
             draw_ctx(gif_canvas, gl, (curr + 1)/10);
             var image_data = gif_canvas.toDataURL();
-			send_image("image-"+i+".dataurl", image_data, next);
+
+			// Zero-pad the number
+			var num = "0".repeat((app.frames + "").length - (i + "").length) + i;
+			
+			send_image("image-"+num, image_data, next);
+			app.send_status = i + "/" + app.frames;
         } else {
             rendering_gif = false;
+			app.send_status = "";
         }
         i++;
     }
