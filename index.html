@@ -38,10 +38,13 @@
 						
 						<div class="text-center">
 							<p>
+								<button name="send-to-server" class="inline-block"
+										v-on:click="send_to_server">
+									Send to server
+								</button>
 								<button name="make-gif" class="inline-block">
 									Create gif
 								</button>
-								
 								<button name="make-png" class="inline-block">
 									Create stacked png
 								</button>
@@ -102,7 +105,6 @@
 						</div>
 					</div>
 				</div>
-
 				<div class="foldable foldable-hidden">
 					<div class="foldable-header">
 						GPU sound tools

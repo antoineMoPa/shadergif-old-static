@@ -89,8 +89,13 @@ function parse {
 			if [ $lcount = 1 ]; then
 				# find path
 				# (by removing GET/POST and HTTP)
-				url=$(echo $line | sed "s/GET \|POST \|OPTIONS //g" | sed "s/ HTTP\/[0-9\.]*//g")
+
+				if [[ $line == OPTIONS* ]]; then
+					echo "" | ./hacky shadergif_http_wrap.native
+					break;
+				fi
 				
+				url=$(echo $line | sed "s/GET \|POST \|OPTIONS //g" | sed "s/ HTTP\/[0-9\.]*//g")
 			fi
 		fi
 	done

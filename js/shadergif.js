@@ -115,6 +115,9 @@ var app = new Vue({
 		load_default_sound_shader: function(){
 			this.code = load_script("default-sound-shader");
 			f_editor.setValue(this.code);
+		},
+		send_to_server: function(){
+			make_png_server();
 		}
     }
 });
@@ -517,6 +520,59 @@ function make_gif(){
     next();
 }
 
+function send_image(name, data, callback){
+	var api = window.location.protocol + "//" + window.location.host + ":4002/api";
+	try{
+		var xhr = new XMLHttpRequest;
+		xhr.open('POST', api + "/upload.sh", true);
+		xhr.onreadystatechange = function(){
+			if (4 == xhr.readyState) {
+				callback();
+			}
+		};
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.send(name+"="+data);
+	} catch (e){
+		// Do nothing
+		console.log(e);
+	}
+}
+
+// Render all frames to a pngs while sending them to a server
+function make_png_server(){
+    rendering_gif = true;
+    
+    var tempCanvas = document.createElement("canvas");
+    var canvas = tempCanvas;
+    
+    canvas.width = gif_canvas.width;
+    canvas.height = gif_canvas.height * app.frames;
+    var ctx = canvas.getContext("2d");
+
+    var i = 0;
+
+    /*
+      "Unrolled" async loop:
+      for every image:
+      render & load image
+      onload: add to canvas
+      when all are loaded: create image from canvas
+     */
+    function next(){
+        if(i < app.frames){
+            var curr = i;
+            draw_ctx(gif_canvas, gl, (curr + 1)/10);
+            var image_data = gif_canvas.toDataURL();
+			send_image("image-"+i+".dataurl", image_data, next);
+        } else {
+            rendering_gif = false;
+        }
+        i++;
+    }
+    
+    next();
+}
+
 
 // Render all the frames to a png
 function make_png(){
@@ -674,27 +730,3 @@ function play_sound(){
 	var deltat = (lastChunk - audioCtx.currentTime) * 1000 - 500;
 	timeout = setTimeout(play_sound,deltat);
 }
-
-
-/*
-
-// Some work on server communication
-
-(function(){
-	var api = window.location.protocol + "//" + window.location.host + "o/shadergif_api";
-	try{
-        var xhr = new XMLHttpRequest;
-        xhr.open('GET', api, true);
-		xhr.onreadystatechange = function(){
-			if (4 == xhr.readyState) {
-				console.log(xhr.responseText);
-			}
-        };
-		xhr.setRequestHeader('Content-type', 'application/json');
-        xhr.send();
-    } catch (e){
-		// Do nothing
-		console.log(e);
-    }
-})();
-*/
