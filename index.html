@@ -29,7 +29,7 @@
 				</pre>
 				<pre class="vertex-error-pre error-pre">
 				</pre>
-
+				
 				<div class="foldable">
 					<div class="foldable-header">
 						Gif tools
@@ -39,6 +39,7 @@
 						<div class="text-center">
 							<p>
 								<button name="send-to-server" class="inline-block"
+										v-if="has_sg_api"
 										v-on:click="send_to_server">
 									Send to server {{ send_status }}
 								</button>

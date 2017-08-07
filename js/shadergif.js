@@ -9,6 +9,8 @@
 
   */
 
+var sg_api = window.location.protocol + "//" + window.location.host + ":4002/api";
+
 var is_example = window.location.href.match(/\?file\=([_a-zA-Z0-9\/]+\.glsl)/);
 var DEFAULT_WIDTH = 540;
 var DEFAULT_HEIGHT = 540;
@@ -30,6 +32,7 @@ var app = new Vue({
     el: "#shadergif-app",
     data: {
         canvas: null,
+		has_sg_api: false,
 		sound_mode: false,
 		send_status: "",
         error: "",
@@ -534,10 +537,9 @@ function make_gif(){
 }
 
 function send_image(name, data, callback){
-	var api = window.location.protocol + "//" + window.location.host + ":4002/api";
 	try{
 		var xhr = new XMLHttpRequest;
-		xhr.open('POST', api + "/upload.sh", true);
+		xhr.open('POST', sg_api + "/upload.sh", true);
 		xhr.onreadystatechange = function(){
 			if (4 == xhr.readyState) {
 				callback();
@@ -749,3 +751,25 @@ function play_sound(){
 	var deltat = (lastChunk - audioCtx.currentTime) * 1000 - 500;
 	timeout = setTimeout(play_sound,deltat);
 }
+
+function detect_sg_api(){
+	try{
+		var xhr = new XMLHttpRequest;
+		xhr.open('GET', sg_api + "/exists.sh", true);
+		xhr.onreadystatechange = function(){
+			if (4 == xhr.readyState) {
+				if(xhr.responseText.substr(0,3) == "yes"){
+					app.has_sg_api = true;
+				}
+			}
+		};
+		
+		xhr.setRequestHeader('Content-Type', 'text/plain');
+		xhr.send();
+	} catch (e){
+		// Do nothing
+		console.log(e);
+	}
+}
+
+detect_sg_api();
