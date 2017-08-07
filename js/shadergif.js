@@ -38,6 +38,7 @@ var app = new Vue({
         error: "",
         code: default_fragment_policy(),
         frames: 10,
+		time: 0,
 		passes: 1,
 		passes_defined_in_code: false,
 		frames_defined_in_code: false,
@@ -100,8 +101,14 @@ var app = new Vue({
 			if(result == null){
 				this.frames_defined_in_code = false;
 			} else {
-				this.frames_defined_in_code = true;
-				this.frames = parseInt(result[1]);
+				var qty = parseInt(result[1]);
+				
+				if(isNaN(qty) || qty < 1){
+					this.frames_defined_in_code = false;
+				} else {
+					this.frames_defined_in_code = true;
+					this.frames = qty;
+				}
 			}
 		},
 		recompile: function(){
@@ -419,20 +426,17 @@ function draw_ctx(can, ctx, time){
 		// Set time attribute
 		var tot_time = app.frames * anim_delay;
 		
-		var time = time ||
-			parseFloat(
-				((new Date()).getTime() % tot_time)
-					/
-					10
-			);
+		app.time = time.toFixed(4);
 		
 		var timeAttribute = ctx.getUniformLocation(ctx.program, "time");
 		ctx.uniform1f(timeAttribute, time);
 		
 		var iGlobalTimeAttribute = ctx.getUniformLocation(ctx.program, "iGlobalTime");
 		var date = new Date();
-		var time = (date.getTime() % (3600 * 24)) / 1000.0;
-		ctx.uniform1f(iGlobalTimeAttribute, time);
+		var gtime = (date.getTime() % (3600 * 24)) / 1000.0;
+		ctx.uniform1f(iGlobalTimeAttribute, gtime);
+		
+		
 		var iResolutionAttribute = ctx.getUniformLocation(ctx.program, "iResolution");
 		
 		ctx.uniform3fv(iResolutionAttribute,
@@ -472,7 +476,7 @@ setInterval(
         window.requestAnimationFrame(function(){
             // When rendering gif, draw is done elsewhere
             if(!rendering_gif){
-                draw_ctx(gif_canvas, gl, (frame + 1)/10);
+                draw_ctx(gif_canvas, gl, (frame + 1) / app.frames);
             }
         });
     }
@@ -515,7 +519,7 @@ function make_gif(){
     function next(){
         if(i < app.frames){
             var curr = i;
-            draw_ctx(gif_canvas, gl, (curr + 1)/10);
+            draw_ctx(gif_canvas, gl, (curr + 1) / app.frames);
             var image_data = gif_canvas.toDataURL();
             var temp_img = document.createElement("img");
             temp_img.src = image_data;
@@ -576,7 +580,7 @@ function make_png_server(){
     function next(){
         if(i < app.frames){
             var curr = i;
-            draw_ctx(gif_canvas, gl, (curr + 1)/10);
+            draw_ctx(gif_canvas, gl, (curr + 1) / app.frames);
             var image_data = gif_canvas.toDataURL();
 
 			// Zero-pad the number
@@ -618,7 +622,7 @@ function make_png(){
     function next(){
         if(i < app.frames){
             var curr = i;
-            draw_ctx(gif_canvas, gl, (curr + 1)/10);
+            draw_ctx(gif_canvas, gl, (curr + 1) / app.frames);
             var image_data = gif_canvas.toDataURL();
             var temp_img = document.createElement("img");
             temp_img.src = image_data;
