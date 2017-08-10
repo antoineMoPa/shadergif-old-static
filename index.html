@@ -23,9 +23,9 @@
 				<div class="text-center">
 					<h3>Gif preview</h3>
 				</div>
-				<canvas class="gif-canvas"></canvas>
+				<canvas class="gif-canvas" v-on:mousemove="canvas_mousemove"></canvas>
 				<p class="text-center">
-					time: {{ time }}
+					time: {{ time }}, mouse: {{ mouse[0] }}, {{ mouse[1] }}
 				</p>
                 <pre class="fragment-error-pre error-pre">
 				</pre>

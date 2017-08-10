@@ -49,6 +49,7 @@ var app = new Vue({
 			dithering: 'FloydSteinberg'
 		},
 		autocompile: true,
+		mouse: "",
 		images: []
     },
     watch: {
@@ -141,6 +142,12 @@ var app = new Vue({
 		},
 		send_to_server: function(){
 			make_png_server();
+		},
+		canvas_mousemove: function(e){
+			var c = e.target;
+			var x = (e.clientX - c.offsetLeft) / this.width;
+			var y = (e.clientY - c.offsetTop) / this.height;
+			this.mouse = [x.toFixed(4), y.toFixed(4)];
 		}
     }
 });
