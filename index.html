@@ -25,7 +25,7 @@
 				</div>
 				<canvas class="gif-canvas" v-on:mousemove="canvas_mousemove"></canvas>
 				<p class="text-center">
-					time: {{ time }}, mouse: {{ mouse[0] }}, {{ mouse[1] }}
+					time: {{ time }}, mouse: {{ mouse[0].toFixed(4) }}, {{ mouse[1].toFixed(4) }}
 				</p>
                 <pre class="fragment-error-pre error-pre">
 				</pre>

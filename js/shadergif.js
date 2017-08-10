@@ -49,7 +49,7 @@ var app = new Vue({
 			dithering: 'FloydSteinberg'
 		},
 		autocompile: true,
-		mouse: "",
+		mouse: [0, 0],
 		images: []
     },
     watch: {
@@ -103,7 +103,6 @@ var app = new Vue({
 				this.frames_defined_in_code = false;
 			} else {
 				var qty = parseInt(result[1]);
-				
 				if(isNaN(qty) || qty < 1){
 					this.frames_defined_in_code = false;
 				} else {
@@ -145,9 +144,9 @@ var app = new Vue({
 		},
 		canvas_mousemove: function(e){
 			var c = e.target;
-			var x = (e.clientX - c.offsetLeft) / this.width;
-			var y = (e.clientY - c.offsetTop) / this.height;
-			this.mouse = [x.toFixed(4), y.toFixed(4)];
+			var x = (e.clientX - c.offsetLeft) / this.width - 0.5;
+			var y = (e.clientY - c.offsetTop) / this.height - 0.5;
+			this.mouse = [x, -y];
 		}
     }
 });
@@ -422,6 +421,11 @@ function draw_ctx(can, ctx, time){
 				renderBufferDim[0] / app.width,
 				renderBufferDim[1] / app.height
 			]
+		);
+
+		gl.uniform2fv(
+			gl.getUniformLocation(ctx.program, 'mouse'),
+			[ app.mouse[0], app.mouse[1] ]
 		);
 		
 		var passAttribute = ctx.getUniformLocation(ctx.program, "pass");
