@@ -1,3 +1,9 @@
+# Project++
+
+Hello! there is a new ruby on rails project based on this at the following URL:
+
+https://github.com/antoineMoPa/shadergif
+
 # ShaderGif
 
 A tool to play with fragment shaders to create nice 2D images. (Because fragment shaders are awesome.)
