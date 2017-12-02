@@ -1,6 +1,6 @@
 # Project++
 
-Hello! there is a new ruby on rails project based on this at the following URL:
+Hello! There is a new ruby on rails project based on this at the following URL:
 
 https://github.com/antoineMoPa/shadergif
 
